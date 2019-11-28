@@ -1,7 +1,9 @@
 import matplotlib.pylab as pl
+import matplotlib.patches as mpatches
 import numpy as np
 import imageio
 import skimage.color
+import skimage.measure
 
 filename = "../videos/input.m4v"
 video = imageio.get_reader(filename, "ffmpeg")
@@ -27,14 +29,18 @@ for i, im in enumerate(video):
     thresholded[:,:] = (grayscale > BRIGHTNESS_THRESHOLD)
 
     # TODO-P1: Erosion/dilation to get rid of small dots
+    #thresholded_opening = skimage.morphology.binary_opening(thresholded)
 
-    # TODO-P0: Connected component analysis with label() from scikit-image
+    # TODO-P1: Pull this out of the render loop
+    labeled = skimage.measure.label(thresholded)
+    labeled_rgb = skimage.color.label2rgb(labeled)
+    # TODO-P0: Track light source by finding the connected component most similar to last known light source component
 
     if current_frame is None:
-        current_frame = pl.imshow(thresholded)
+        current_frame = pl.imshow(labeled_rgb)
         #current_frame = pl.imshow(im)
     else:
-        current_frame.set_data(thresholded)
+        current_frame.set_data(labeled_rgb)
         #current_frame.set_data(im)
 
     pl.pause(.01)
